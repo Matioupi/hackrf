@@ -19,7 +19,6 @@
  * Boston, MA 02110-1301, USA.
  */
 
-#include "hackrf-ui.h"
 #include "ui_rad1o.h"
 
 /* Weak functions from rad1o app */
@@ -35,9 +34,14 @@ void hackrf_ui_setBBTXVGAGain(const uint32_t gain_db) __attribute__((weak));
 void hackrf_ui_setFirstIFFrequency(const uint64_t freq) __attribute__((weak));
 void hackrf_ui_setFilter(const rf_path_filter_t filter) __attribute__((weak));
 void hackrf_ui_setAntennaBias(bool antenna_bias) __attribute__((weak));
+void hackrf_ui_setClockSource(clock_source_t source) __attribute__((weak));
 
 static void rad1o_ui_init(void) {
     hackrf_ui_init();
+}
+
+static void rad1o_ui_deinit(void) {
+
 }
 
 static void rad1o_ui_set_frequency(uint64_t frequency) {
@@ -84,8 +88,17 @@ static void rad1o_ui_set_antenna_bias(bool antenna_bias) {
     hackrf_ui_setAntennaBias(antenna_bias);
 }
 
+static void rad1o_ui_set_clock_source(clock_source_t source) {
+	hackrf_ui_setClockSource(source);
+}
+
+static bool rad1o_ui_operacake_gpio_compatible(void) {
+	return true;
+}
+
 static const hackrf_ui_t rad1o_ui = {
 	&rad1o_ui_init,
+	&rad1o_ui_deinit,
 	&rad1o_ui_set_frequency,
 	&rad1o_ui_set_sample_rate,
 	&rad1o_ui_set_direction,
@@ -97,6 +110,8 @@ static const hackrf_ui_t rad1o_ui = {
 	&rad1o_ui_set_first_if_frequency,
 	&rad1o_ui_set_filter,
 	&rad1o_ui_set_antenna_bias,
+	&rad1o_ui_set_clock_source,
+	&rad1o_ui_operacake_gpio_compatible,
 };
 
 const hackrf_ui_t* rad1o_ui_setup(void) {

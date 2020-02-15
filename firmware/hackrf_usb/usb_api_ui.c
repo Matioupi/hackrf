@@ -1,6 +1,5 @@
 /*
- * Copyright 2012 Jared Boone
- * Copyright 2013 Benjamin Vernoux
+ * Copyright 2020 Mike Walters
  *
  * This file is part of HackRF.
  *
@@ -20,17 +19,22 @@
  * Boston, MA 02110-1301, USA.
  */
 
-#include <streaming.h>
+#include "usb_api_ui.h"
 
-#include <libopencm3/lpc43xx/m4/nvic.h>
-#include <libopencm3/lpc43xx/sgpio.h>
+#include <hackrf_core.h>
+#include <hackrf_ui.h>
+#include <usb_queue.h>
 
-void baseband_streaming_enable(sgpio_config_t* const sgpio_config) {
-	SGPIO_SET_EN_1 = (1 << SGPIO_SLICE_A);
+#include <stddef.h>
+#include <stdint.h>
 
-	sgpio_cpld_stream_enable(sgpio_config);
-}
-
-void baseband_streaming_disable(sgpio_config_t* const sgpio_config) {
-	sgpio_cpld_stream_disable(sgpio_config);
+usb_request_status_t usb_vendor_request_set_ui_enable(
+	usb_endpoint_t* const endpoint,
+	const usb_transfer_stage_t stage
+) {
+	if (stage == USB_TRANSFER_STAGE_SETUP) {
+		hackrf_ui_set_enable(endpoint->setup.value);
+		usb_transfer_schedule_ack(endpoint->in);
+	}
+	return USB_REQUEST_STATUS_OK;
 }
